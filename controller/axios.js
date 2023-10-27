@@ -1,27 +1,32 @@
 const axios = require("axios").default;
+const UserAgent = require("user-agents");
+const { HttpsProxyAgent } = require("https-proxy-agent");
+const dayjs = require("dayjs");
 
-const http = axios.create({
-  timeout: 120000,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
+const instance = axios.create();
+
+let expireTime = dayjs();
+let ip = undefined;
 
 // 获取代理服务器
 async function getProxyIp() {
-  const data = await http.get("https://dongtaiip.com");
-  return data.proxy;
+  const res = await axios.get(
+    "https://dama.com"
+  );
+  expireTime = res.data.data[0].expire_time
+  ip = `http://${res.data.data[0].ip}:${res.data.data[0].port}`
+  return ip;
 }
 
-http.interceptors.request.use(async (config) => {
-  // config.httpsAgent = await new require("https-proxy-agent")(
-  //   `http://${await getProxyIp()}`
-  // );
-  config.headers[`user-agent`] = new (require("user-agents"))().data.userAgent;
+instance.interceptors.request.use(async (config) => {
+  const httpsAgent = dayjs(expireTime).diff(dayjs(), 'minute') < 5 ? await getProxyIp() : ip;
+  console.log('使用的代理地址为：', httpsAgent);
+  config.httpsAgent = new HttpsProxyAgent(httpsAgent);
+  config.headers[`user-agent`] = (new UserAgent()).toString();
   return config;
 });
 
-http.interceptors.response.use(
+instance.interceptors.response.use(
   (response) => {
     return Promise.resolve(response);
   },
@@ -29,4 +34,5 @@ http.interceptors.response.use(
     return Promise.reject(err);
   }
 );
-module.exports = http;
+
+exports.http = instance

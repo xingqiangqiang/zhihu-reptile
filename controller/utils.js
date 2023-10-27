@@ -1,4 +1,4 @@
-const http = require("./axios.js");
+const { http } = require("./axios.js");
 const fs = require("fs");
 const path = require("path");
 
@@ -12,17 +12,20 @@ function downloadImg(srcArr, dir, index, callback) {
       if (res.status === 200 && !!res.data) {
         fs.writeFile(`${dir}/${index}${type}`, res.data, "binary", (err) => {
           if (err) throw err;
+          console.log(`图片${url}下载成功!!!`);
         });
       }
     })
     .catch((err) => {
-      console.log(`图片${url}下载失败`);
+      console.log(`图片${url}下载失败!!!`);
     })
     .finally(() => {
       if (index < srcArr.length - 1) {
-        downloadImg(srcArr, dir, index + 1, callback);
+        setTimeout(() => {
+          console.log('下载图片中...');
+          downloadImg(srcArr, dir, index + 1, callback);
+        }, Math.random() * 1000)
       } else {
-        console.log(`图片${url}下载完成`);
         callback && callback();
       }
     });

@@ -6,8 +6,10 @@
 
 封装的 axios 主要目的是为了请求时候每个接口调用动态 ip 接口（网上有卖的服务商），防止自己的唯一 ip 被封禁，请求头添加了 user-agent，也是为了防止被封禁
 
+```bash
 npm i
 npm start
+```
 
 爬取数据
 http://localhost:3000/api/zhihu?q=想要搜索的词
@@ -20,3 +22,13 @@ https://www.jianshu.com/p/c6a2c2ed10f8
 https://codeleading.com/article/81245562517/
 
 大部分坑已踩，有任何问题可以留言讨论！
+
+# 2023.10.27 更新
+
+新增爬取热榜（热榜数据来源参照[github]('https://github.com/justjavac/zhihu-trending-hot-questions') clone 到本地或者服务器上，有能力的可以调用 github 接口获取等）
+
+新增爬取热门收藏夹
+
+新增爬取专栏
+
+暂时取消评论爬取（太慢了，容易被检测到人机验证）
