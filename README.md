@@ -1,4 +1,4 @@
-# zhihu-reptile
+# 知乎爬虫
 
 需要个入参 q，相当于在输入框随便输入，根据接口返回循环获取搜索词的所有文章内容，并且根据 id 获取对应的文章所有评论，使用 cheerio 解析文本，获取 img 下载到本地，并且替换输出的文件内的 src 为本地文件路径,文件会输出到 static/关键词/id 下，deal.txt - 处理 content 只保留文本内容+替换 img 的 src origin.txt - 保留源文件 content+所有的评论数据 {index}.jpg 等，添加了爬取完上传服务器的操作，根据需要修改
 
@@ -25,7 +25,7 @@ https://codeleading.com/article/81245562517/
 
 # 2023.10.27 更新
 
-新增爬取热榜（热榜数据来源参照[github]('https://github.com/justjavac/zhihu-trending-hot-questions') clone 到本地或者服务器上，有能力的可以调用 github 接口获取等）
+新增爬取热榜（热榜数据来源参照（https://github.com/justjavac/zhihu-trending-hot-questions） 将项目 clone 到本地或者服务器上，有能力的可以调用 github 接口获取 raw 文件夹下所有文件等，本项目为了快速采集，分成了 4 年的）
 
 新增爬取热门收藏夹
 
