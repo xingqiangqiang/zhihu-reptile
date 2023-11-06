@@ -11,7 +11,7 @@ let ip = undefined;
 // 获取代理服务器
 async function getProxyIp() {
   const res = await axios.get(
-    "https://dama.com"
+    "https://demo.com"
   );
   expireTime = res.data.data[0].expire_time
   ip = `http://${res.data.data[0].ip}:${res.data.data[0].port}`

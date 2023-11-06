@@ -21,10 +21,8 @@ function downloadImg(srcArr, dir, index, callback) {
     })
     .finally(() => {
       if (index < srcArr.length - 1) {
-        setTimeout(() => {
-          console.log('下载图片中...');
-          downloadImg(srcArr, dir, index + 1, callback);
-        }, Math.random() * 1000)
+        console.log('下载图片中...');
+        downloadImg(srcArr, dir, index + 1, callback);
       } else {
         callback && callback();
       }

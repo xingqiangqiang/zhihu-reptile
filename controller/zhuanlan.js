@@ -8,12 +8,15 @@ const cheerio = require("cheerio");
 const { comment } = require("./comment.js");
 const { downloadImg } = require("./utils.js");
 const isUrl = require("is-url");
+const schedule = require("node-schedule");
+const dayjs = require("dayjs");
+const { insertIntoDB, connection } = require("./db.js");
 
 let allZhuanLanList = [];
 
 const getAllZhuanLan = (nextZhuanLanUrl) => {
     console.log('获取所有专栏中...');
-    const zhuanLanUrl = nextZhuanLanUrl ?? 'https://zhuanlan.zhihu.com/api/recommendations/columns?limit=10000&offset=0';
+    const zhuanLanUrl = nextZhuanLanUrl ?? 'https://zhuanlan.zhihu.com/api/recommendations/columns?limit=1000&offset=0&seed=7';
     const url_suffix = zhuanLanUrl.replace("https://zhuanlan.zhihu.com", "");
     const secretKeys = [x_zse_93, url_suffix, d_c0, x_zst_81].join("+");
     const md5_s = md5(secretKeys);
@@ -28,9 +31,10 @@ const getAllZhuanLan = (nextZhuanLanUrl) => {
     };
 
     http(zhuanLanUrl, { headers: headers }).then(res => {
-        if (!res.data.paging.is_end && allZhuanLanList.length < 10000) {
-            allZhuanLanList = [...allZhuanLanList, ...res.data.data]
-            console.log(allZhuanLanList.length);
+        allZhuanLanList = [...allZhuanLanList, ...res.data.data.filter(item => {
+            return item !== null
+        })]
+        if (!res.data.paging.is_end && allZhuanLanList.length < 500) {
             getAllZhuanLan(res.data.paging.next);
         } else {
             console.log('获取所有专栏完成，共 ' + allZhuanLanList.length);
@@ -83,7 +87,7 @@ const dealZhuanLanItems = (nextZhuanLanItemsUrl, zhuanLanItem, allZhuanLanList, 
 };
 
 const dealZhuanLanItem = (item, resArr, index, zhuanLanItem, pIndex, nextZhuanLanItemsUrl, allZhuanLanList) => {
-    const fileDir = path.join('/fedataset/zhihu', 'zhuanlan', `zhuanlan_${zhuanLanItem.id}`, String(item.id));
+    const fileDir = path.join('/fedataset/zhihu', 'zhuanlan', md5(zhuanLanItem.id).slice(-4), `zhuanlan_${zhuanLanItem.id}`, String(item.id));
     fs.mkdir(fileDir, { recursive: true }, (err) => {
         if (err) throw err;
         // 源数据
@@ -123,14 +127,21 @@ const dealZhuanLanItem = (item, resArr, index, zhuanLanItem, pIndex, nextZhuanLa
                     const dealFilePath = path.join(fileDir, "deal.txt");
                     fs.writeFile(dealFilePath, str ?? "", (err) => {
                         if (err) throw err;
-                        console.log('专栏：' + item.id + ' 图片、源文件、处理文件写入完成');
+                        console.log('专栏：' + item.id + ' 图片、源文件、处理文件写入完成,开始写入数据库...');
+
+                        // 写入数据库
+                        const insertSQL = "insert into zhuanlan(id,z_id,content,md5_end4,create_time,interface_data,path) values (?,?,?,?,?,?,?)";
+                        const dataArr = [item.id, zhuanLanItem.id, item.content ?? '', md5(zhuanLanItem.id).slice(-4), dayjs().format('YYYY-MM-DD HH:mm:ss'), JSON.stringify(item), fileDir];
+
+                        insertIntoDB(insertSQL, dataArr);
+
                         if (index < resArr.length - 1) {
                             dealZhuanLanItem(resArr[index + 1], resArr, index + 1, zhuanLanItem, pIndex, nextZhuanLanItemsUrl, allZhuanLanList);
                         } else {
                             console.log('当前50条收藏处理完成，约2s后开始获取下50条专栏数据!');
                             setTimeout(() => {
                                 dealZhuanLanItems(nextZhuanLanItemsUrl, zhuanLanItem, allZhuanLanList, pIndex);
-                            }, Math.random() * 2000);
+                            }, Math.random() * 2000)
                         }
                     });
                 };
@@ -155,3 +166,5 @@ const dealZhuanLanItem = (item, resArr, index, zhuanLanItem, pIndex, nextZhuanLa
 }
 
 getAllZhuanLan();
+
+exports.getAllZhuanLan = getAllZhuanLan;

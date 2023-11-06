@@ -2,19 +2,24 @@ const fs = require("fs");
 const { hot } = require("../controller/hot.js");
 const path = require("path");
 const dayjs = require('dayjs');
+const { createDBTable } = require('../controller/db.js');
+const schedule = require("node-schedule");
 
 const filePath = path.join("/mnt/vepfs/xqq/zhihu-trending-hot-questions", 'raw');
 
-fs.readdir(filePath, (err, files) => {
-    if (err) throw err;
-    const data_2020 = files.filter(item => {
-        return dayjs(item.replace('.json', '')).isSame('2020', "year")
-    })
+const reptile_2020 = () => {
+    fs.readdir(filePath, (err, files) => {
+        if (err) throw err;
+        const data_2020 = files.filter(item => {
+            return dayjs(item.replace('.json', '')).isSame('2020', "year")
+        })
 
-    loopContent(data_2020[0], data_2020, 0);
-})
+        loopContent(data_2020[0], data_2020, 0);
+    })
+}
 
 const loopContent = (file, files, index) => {
+    createDBTable(`hot_2020_${dayjs(file.replace('.json', '')).get("month") + 1}`);
     fs.readFile(path.join(filePath, file), 'utf8', (err, content) => {
         if (err) throw err;
         hot(undefined, JSON.parse(content)[0], JSON.parse(content), 0, path.join(filePath, file), () => {
@@ -23,6 +28,8 @@ const loopContent = (file, files, index) => {
             } else {
                 console.log(`===================== 2020年热门话题全部完成 =====================`);
             }
-        })
+        }, file)
     })
 }
+
+reptile_2020();

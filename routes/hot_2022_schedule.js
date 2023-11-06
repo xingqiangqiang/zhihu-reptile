@@ -32,4 +32,6 @@ const loopContent = (file, files, index) => {
     })
 }
 
-reptile_2022();
+schedule.scheduleJob("0 0 */2 * * *", () => {
+    reptile_2022();
+})

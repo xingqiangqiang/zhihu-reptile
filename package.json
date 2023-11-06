@@ -4,9 +4,7 @@
   "private": true,
   "scripts": {
     "start": "nodemon ./bin/www",
-    "hot": "nodemon ./routes/hot_2020.js",
-    "hot_collection": "nodemon ./controller/hot-collection.js",
-    "zhuanlan": "nodemon ./controller/zhuanlan.js"
+    "hot": "nodemon ./controller/hot.js"
   },
   "dependencies": {
     "axios": "^1.5.1",
@@ -24,6 +22,8 @@
     "jsdom": "^22.1.0",
     "md5": "^2.3.0",
     "morgan": "~1.9.1",
+    "mysql": "^2.18.1",
+    "node-schedule": "^2.1.1",
     "nodemon": "^3.0.1",
     "qs": "^6.11.2",
     "user-agents": "^1.0.1444"
